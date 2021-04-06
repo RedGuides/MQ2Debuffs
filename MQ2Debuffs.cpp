@@ -3,7 +3,7 @@
 // Author: PinkFloyd33      |
 // Author: s0rcier          |
 // Version: 1.2             |
-// Date: 20061223           | 
+// Date: 20061223           |
 // v2.0 - Eqmule 07-22-2016 - Added string safety.
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // This plugin is designed to help with curing detrimental effects. It is used to reports harmful effects,
@@ -50,11 +50,12 @@
 // Debuff[5682 2899 887].X                        : return infos for buff from this bufflistid.
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 
-#include "../MQ2Plugin.h"
+#include <mq/Plugin.h>
 
 PreSetup("MQ2Debuff");
 PLUGIN_VERSION(2.0);
 
+// FIXME:  I suspect most of these are maintained in core.
 #define MAXBUFF_WARDER         30
 #define MAXBUFF_MYSELF         25
 
@@ -95,399 +96,394 @@ PLUGIN_VERSION(2.0);
 class MQ2DebuffType *pDebuffType=0;
 class MQ2DebuffType : public MQ2Type {
 private:
-  PSPELL dList[30]; long dSize;
-  PSPELL bList[30]; long bSize;
-  PSPELL aList[30]; long aSize;
-  char   Temp[MAX_STRING];
+	PSPELL dList[30]; long dSize;
+	PSPELL bList[30]; long bSize;
+	PSPELL aList[30]; long aSize;
+	char   Temp[MAX_STRING];
 
-  int GetSlotDebuff(PSPELL spell)
-  {
-	  for (int slot = 0; slot < GetSpellNumEffects(spell); slot++) {
-		  if (GetSpellAttrib(spell, slot) == COUNTER_DISEASE ||
-			  GetSpellAttrib(spell, slot) == COUNTER_POISON ||
-			  GetSpellAttrib(spell, slot) == COUNTER_CURSE ||
-			  GetSpellAttrib(spell, slot) == COUNTER_CORRUPTION) {
-			  return slot + 1;
-		  }
-	  }
-	return 0;
-  }
+	int GetSlotDebuff(PSPELL spell)
+	{
+		for (int slot = 0; slot < GetSpellNumEffects(spell); slot++) {
+			const int attrib = GetSpellAttrib(spell, slot);
+			if (attrib == COUNTER_DISEASE || attrib == COUNTER_POISON || attrib == COUNTER_CURSE || attrib == COUNTER_CORRUPTION) {
+				return slot + 1;
+			}
+		}
+		return 0;
+	}
 
-  int GetSpellCount(int CounterType) {
-    int counters=0;
-    for(int buff=0; buff<dSize; buff++) {
-      for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-		  if(GetSpellAttrib(dList[buff],slot)==CounterType) {
-          counters++;
-          break;
-        }
-      }
-    }
-    return counters;
-  }
+	int GetSpellCount(int CounterType) {
+		int counters=0;
+		for(int buff=0; buff<dSize; buff++) {
+			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if(GetSpellAttrib(dList[buff],slot)==CounterType) {
+					counters++;
+					break;
+				}
+			}
+		}
+		return counters;
+	}
 
-  int GetTotalCounters(int CounterType) {
-    int counters=0;
-    for(int buff=0; buff<dSize; buff++) {
-	  for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-        if(GetSpellAttrib(dList[buff],slot)==CounterType)
-          counters+=(int)GetSpellBase(dList[buff],slot);
-      }
-    }
-    return counters;
-  }
+	int GetTotalCounters(int CounterType) {
+		int counters=0;
+		for(int buff=0; buff<dSize; buff++) {
+			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if(GetSpellAttrib(dList[buff],slot)==CounterType)
+					counters+=(int)GetSpellBase(dList[buff],slot);
+			}
+		}
+		return counters;
+	}
 
-  int SlotCalculate(PSPELL spell, int slot) {
-    char Buffer[MAX_STRING]={0};
-    SlotValueCalculate(Buffer,spell,slot,1);
-    return atoi(Buffer);
-  }
+	int SlotCalculate(PSPELL spell, int slot) {
+		char Buffer[MAX_STRING]= { 0 };
+		SlotValueCalculate(Buffer,spell,slot,1);
+		return atoi(Buffer);
+	}
 
-  bool GetDebuffInfo(int DebuffType, bool HaveCounter, bool BaseCheck) {
-    for(long buff=0; buff<dSize; buff++) {
-      if(HaveCounter && !GetSlotDebuff(dList[buff])) continue;
-      for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-        if(GetSpellAttrib(dList[buff],slot)==DebuffType)
-        if(!BaseCheck || GetSpellBase(dList[buff],slot)<=0)
-        return true;
-      }
-    }
-    return false;
-  }
+	bool GetDebuffInfo(int DebuffType, bool HaveCounter, bool BaseCheck) {
+		for(long buff=0; buff<dSize; buff++) {
+			if(HaveCounter && !GetSlotDebuff(dList[buff]))
+				continue;
+			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if(GetSpellAttrib(dList[buff],slot)==DebuffType)
+					if(!BaseCheck || GetSpellBase(dList[buff],slot)<=0)
+						return true;
+			}
+		}
+		return false;
+	}
 
-  bool GetEffectInfo(int EffectType) {
-    for(long buff=0; buff<aSize; buff++) {
-      for(int slot=0; slot<GetSpellNumEffects(aList[buff]); slot++) {
-        if(GetSpellAttrib(aList[buff],slot)==EffectType)
-        return true;
-      }
-    }
-    return false;
-  }
+	bool GetEffectInfo(int EffectType) {
+		for(long buff=0; buff<aSize; buff++) {
+			for(int slot=0; slot<GetSpellNumEffects(aList[buff]); slot++) {
+				if(GetSpellAttrib(aList[buff],slot)==EffectType)
+					return true;
+			}
+		}
+		return false;
+	}
 
-  bool GetRooted() {
-    for(int buff=0; buff<dSize; buff++) {
-        if(GetSpellAttrib(dList[buff],DEBUFF_ROOTSLOT)==DEBUFF_ROOT) {
-          return true;
-          break;
-        }
-      }
-   return false;
-  }
+	bool GetRooted() {
+		for(int buff=0; buff<dSize; buff++) {
+			if(GetSpellAttrib(dList[buff],DEBUFF_ROOTSLOT)==DEBUFF_ROOT) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-  int GetDrainInfo(int DrainType, int ReturnType) {
-    int amount=0;
-    if(ReturnType) {
-      int CountC=0; int CountD=0; int CountP=0; int CountCo=0;
-      for(int buff=0; buff<dSize; buff++) {
-        if(GetSlotDebuff(dList[buff])) {
-          int LocalC=0; int LocalD=0; int LocalP=0; int LocalCo=0; int DrainValue=0;
-		  for (int slot = 0; slot < GetSpellNumEffects(dList[buff]); slot++) {
-			  switch (GetSpellAttrib(dList[buff], slot)) {
-				  case COUNTER_CURSE:   LocalC += (int)GetSpellBase(dList[buff], slot); break;
-				  case COUNTER_DISEASE: LocalD += (int)GetSpellBase(dList[buff], slot); break;
-				  case COUNTER_POISON:  LocalP += (int)GetSpellBase(dList[buff], slot); break;
-				  case COUNTER_CORRUPTION: LocalCo += (int)GetSpellBase(dList[buff], slot); break;
-				  default:
-					  if (GetSpellAttrib(dList[buff], slot) == DrainType && GetSpellBase(dList[buff], slot) < 0) {
-						  DrainValue = SlotCalculate(dList[buff], slot);
-					  }
-			  }
-		  }
-          if(DrainValue) {
-            amount+=DrainValue;
-            CountC+=LocalC;
-            CountD+=LocalD;
-            CountP+=LocalP;
-         CountCo+=LocalCo;
-          }
-        }
-      }
-      switch(ReturnType) {
-        case RETURN_ALL:     return CountC+CountD+CountP+CountCo;
-        case RETURN_CURSE:   return CountC;
-        case RETURN_DISEASE: return CountD;
-        case RETURN_POISON:  return CountP;
-      case RETURN_CORRUPTION: return CountCo;
-      }
-    }
-    return amount;
-  }
+	int GetDrainInfo(int DrainType, int ReturnType) {
+		int amount=0;
+		if(ReturnType) {
+			int CountC=0; int CountD=0; int CountP=0; int CountCo=0;
+			for(int buff=0; buff<dSize; buff++) {
+				if(GetSlotDebuff(dList[buff])) {
+					int LocalC=0; int LocalD=0; int LocalP=0; int LocalCo=0; int DrainValue=0;
+					for (int slot = 0; slot < GetSpellNumEffects(dList[buff]); slot++) {
+						switch (GetSpellAttrib(dList[buff], slot)) {
+							case COUNTER_CURSE:   LocalC += (int)GetSpellBase(dList[buff], slot); break;
+							case COUNTER_DISEASE: LocalD += (int)GetSpellBase(dList[buff], slot); break;
+							case COUNTER_POISON:  LocalP += (int)GetSpellBase(dList[buff], slot); break;
+							case COUNTER_CORRUPTION: LocalCo += (int)GetSpellBase(dList[buff], slot); break;
+							default:
+								if (GetSpellAttrib(dList[buff], slot) == DrainType && GetSpellBase(dList[buff], slot) < 0) {
+									DrainValue = SlotCalculate(dList[buff], slot);
+								}
+						}
+					}
+					if(DrainValue) {
+						amount+=DrainValue;
+						CountC+=LocalC;
+						CountD+=LocalD;
+						CountP+=LocalP;
+						CountCo+=LocalCo;
+					}
+				}
+			}
+			switch(ReturnType) {
+				case RETURN_ALL:        return CountC+CountD+CountP+CountCo;
+				case RETURN_CURSE:      return CountC;
+				case RETURN_DISEASE:    return CountD;
+				case RETURN_POISON:     return CountP;
+				case RETURN_CORRUPTION: return CountCo;
+			}
+		}
+		return amount;
+	}
 
-  bool GetSlowedState() {
-    for(long buff=0; buff<dSize; buff++) {
-      for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-        if(GetSpellAttrib(dList[buff],slot)!=DEBUFF_ATTACKSPEED) continue;
-        int Slow=((GetSpellMax(dList[buff],slot)) ? GetSpellMax(dList[buff],slot): GetSpellBase(dList[buff],slot))-100;
-        if(Slow<0) return true;
-      }
-    }
-    return false;
-  }
+	bool GetSlowedState() {
+		for(long buff=0; buff<dSize; buff++) {
+			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if(GetSpellAttrib(dList[buff],slot)!=DEBUFF_ATTACKSPEED)
+					continue;
+				int Slow=((GetSpellMax(dList[buff],slot)) ? GetSpellMax(dList[buff],slot): GetSpellBase(dList[buff],slot))-100;
+				if(Slow<0)
+					return true;
+			}
+		}
+		return false;
+	}
 
-  int ReturnType(PCHAR Index) {
-    if(!Index[0])                 return RETURN_VALUE;
-    if(!_stricmp(Index,"Disease")) return RETURN_DISEASE;
-    if(!_stricmp(Index,"Poison"))  return RETURN_POISON;
-    if(!_stricmp(Index,"Curse"))   return RETURN_CURSE;
-   if(!_stricmp(Index,"Corruption")) return RETURN_CORRUPTION;
-    if(!_stricmp(Index,"All"))     return RETURN_ALL;
-    return 0;
-  }
+	int ReturnType(PCHAR Index) {
+		if(!Index[0])                  return RETURN_VALUE;
+		if(!_stricmp(Index,"Disease")) return RETURN_DISEASE;
+		if(!_stricmp(Index,"Poison"))  return RETURN_POISON;
+		if(!_stricmp(Index,"Curse"))   return RETURN_CURSE;
+		if(!_stricmp(Index,"Corruption")) return RETURN_CORRUPTION;
+		if(!_stricmp(Index,"All"))     return RETURN_ALL;
+		return 0;
+	}
 
 public:
-  enum DebuffMembers {
-    Poisoned=1,
-    Diseased=2,
-    Cursed=3,
-    Poisons=4,
-    Diseases=5,
-    Curses=6,
-    Count=7,
-    HPDrain=8,
-    EnduranceDrain=9,
-    ManaDrain=10,
-    Slowed=11,
-    SpellSlowed=12,
-    CastingLevel=13,
-    HealingEff=14,
-    SpellDmgEff=15,
-    Snared=16,
-    ManaCost=17,
-    Blind=18,
-    Charmed=19,
-    Feared=20,
-    Silenced=21,
-    Invulnerable=22,
-    Detrimentals=23,
-    Counters=24,
-    Rooted=25,
-   Corruptions=26,
-   Corrupted=27,
-  };
+	// FIXME:  I suspect all of these are maintained in core.
+	enum DebuffMembers {
+		Poisoned=1,
+		Diseased=2,
+		Cursed=3,
+		Poisons=4,
+		Diseases=5,
+		Curses=6,
+		Count=7,
+		HPDrain=8,
+		EnduranceDrain=9,
+		ManaDrain=10,
+		Slowed=11,
+		SpellSlowed=12,
+		CastingLevel=13,
+		HealingEff=14,
+		SpellDmgEff=15,
+		Snared=16,
+		ManaCost=17,
+		Blind=18,
+		Charmed=19,
+		Feared=20,
+		Silenced=21,
+		Invulnerable=22,
+		Detrimentals=23,
+		Counters=24,
+		Rooted=25,
+		Corruptions=26,
+		Corrupted=27,
+	};
 
-  MQ2DebuffType():MQ2Type("Debuff") {
-    TypeMember(Poisoned);
-    TypeMember(Diseased);
-    TypeMember(Cursed);
-    TypeMember(Poisons);
-    TypeMember(Diseases);
-    TypeMember(Curses);
-    TypeMember(Count);
-    TypeMember(HPDrain);
-    TypeMember(EnduranceDrain);
-    TypeMember(ManaDrain);
-    TypeMember(Slowed);
-    TypeMember(SpellSlowed);
-    TypeMember(CastingLevel);
-    TypeMember(HealingEff);
-    TypeMember(SpellDmgEff);
-    TypeMember(Snared);
-    TypeMember(ManaCost);
-    TypeMember(Blind);
-    TypeMember(Charmed);
-    TypeMember(Feared);
-    TypeMember(Silenced);
-    TypeMember(Invulnerable);
-    TypeMember(Detrimentals);
-    TypeMember(Counters);
-    TypeMember(Rooted);
-   TypeMember(Corruptions);
-   TypeMember(Corrupted);
-  }
+	MQ2DebuffType():MQ2Type("Debuff") {
+		TypeMember(Poisoned);
+		TypeMember(Diseased);
+		TypeMember(Cursed);
+		TypeMember(Poisons);
+		TypeMember(Diseases);
+		TypeMember(Curses);
+		TypeMember(Count);
+		TypeMember(HPDrain);
+		TypeMember(EnduranceDrain);
+		TypeMember(ManaDrain);
+		TypeMember(Slowed);
+		TypeMember(SpellSlowed);
+		TypeMember(CastingLevel);
+		TypeMember(HealingEff);
+		TypeMember(SpellDmgEff);
+		TypeMember(Snared);
+		TypeMember(ManaCost);
+		TypeMember(Blind);
+		TypeMember(Charmed);
+		TypeMember(Feared);
+		TypeMember(Silenced);
+		TypeMember(Invulnerable);
+		TypeMember(Detrimentals);
+		TypeMember(Counters);
+		TypeMember(Rooted);
+		TypeMember(Corruptions);
+		TypeMember(Corrupted);
+	}
 
-  void SetBuffs(PCHAR Index) {
-    ZeroMemory(&dList,sizeof(dList)); dSize=0;
-    ZeroMemory(&bList,sizeof(bList)); bSize=0;
-    ZeroMemory(&aList,sizeof(aList)); aSize=0;
-    if(!Index[0] || !_stricmp(Index,"self") || !_stricmp(Index,"myself")) {
-      for(int b=0; b<MAXBUFF_MYSELF; b++) {
-        if(PSPELL spell=GetSpellByID(GetCharInfo2()->Buff[b].SpellID))
-          if(spell->DurationCap>0) {
-            ((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
-            aList[aSize++]=spell;
-          }
-      }
-      return;
-    }
-    if(!_stricmp(Index,"pet") || !_stricmp(Index,"warder")) {
-      if(pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0)
-        for(int b=0; b<MAXBUFF_WARDER; b++) {
-          if(PSPELL spell=GetSpellByID(((PEQPETINFOWINDOW)pPetInfoWnd)->Buff[b]))
-            if(spell->DurationCap>0) {
-              ((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
-              aList[aSize++]=spell;
-            }
-        }
-      return;
-    }
-    char BuffID[MAX_STRING];
-    for(int b=0; b<MAXBUFF_WARDER; b++) {
-      GetArg(BuffID,Index,b+1);
-      if(PSPELL spell=GetSpellByID(atol(BuffID)))
-        if(spell->DurationCap>0) {
-          ((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
-          aList[aSize++]=spell;
-        }
-    }
-  }
+	void SetBuffs(const char* Index) {
+		// FIXME:  ZeroMemory/No null checks
+		ZeroMemory(&dList,sizeof(dList)); dSize=0;
+		ZeroMemory(&bList,sizeof(bList)); bSize=0;
+		ZeroMemory(&aList,sizeof(aList)); aSize=0;
+		if(!Index[0] || !_stricmp(Index,"self") || !_stricmp(Index,"myself")) {
+			for(int b=0; b<MAXBUFF_MYSELF; b++) {
+				if(PSPELL spell=GetSpellByID(GetPcProfile()->Buff[b].SpellID))
+				if(spell->DurationCap>0) {
+					((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
+					aList[aSize++]=spell;
+				}
+			}
+			return;
+		}
 
-  bool GetMember(MQ2VARPTR VarPtr, PCHAR Member, PCHAR Index, MQ2TYPEVAR &Dest) {
-    if(PMQ2TYPEMEMBER pMember=MQ2DebuffType::FindMember(Member))
-      switch((DebuffMembers)pMember->ID) {
-        case Poisoned:
-          Dest.Type=pIntType;
-          Dest.Int =GetTotalCounters(COUNTER_POISON);
-          return true;
-        case Diseased:
-          Dest.Type=pIntType;
-          Dest.Int=GetTotalCounters(COUNTER_DISEASE);
-          return true;
-        case Cursed:
-          Dest.Type=pIntType;
-          Dest.Int=GetTotalCounters(COUNTER_CURSE);
-          return true;
-      case Corrupted:
-          Dest.Type=pIntType;
-          Dest.Int=GetTotalCounters(COUNTER_CORRUPTION);
-          return true;
-        case Poisons:
-          Dest.Type=pIntType;
-          Dest.Int=GetSpellCount(COUNTER_POISON);
-          return true;
-        case Diseases:
-          Dest.Type=pIntType;
-          Dest.Int=GetSpellCount(COUNTER_DISEASE);
-          return true;
-        case Curses:
-          Dest.Type=pIntType;
-          Dest.Int=GetSpellCount(COUNTER_CURSE);
-          return true;
-        case Corruptions:
-          Dest.Type=pIntType;
-          Dest.Int=GetSpellCount(COUNTER_CORRUPTION);
-          return true;
-        case Count:
-          Dest.Type=pIntType;
-          Dest.Int=GetSpellCount(COUNTER_POISON) +
-                   GetSpellCount(COUNTER_DISEASE) +
-                   GetSpellCount(COUNTER_CURSE) +
-               GetSpellCount(COUNTER_CORRUPTION);
-          return true;
-        case HPDrain:
-          Dest.Type=pIntType;
-          Dest.Int=GetDrainInfo(DRAIN_HP,ReturnType(Index));
-          return true;
-        case EnduranceDrain:
-          Dest.Type=pIntType;
-          Dest.Int=GetDrainInfo(DRAIN_ENDU,ReturnType(Index));
-          return true;
-        case ManaDrain:
-          Dest.Type=pIntType;
-          Dest.Int=GetDrainInfo(DRAIN_MANA,ReturnType(Index));
-          return true;
-        case Slowed:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetSlowedState();
-          return true;
-        case SpellSlowed:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(DEBUFF_SPELLHASTE,true,true);
-          return true;
-        case CastingLevel:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(DEBUFF_CASTLEVEL,true,true);
-          return true;
-        case HealingEff:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(DEBUFF_HEALINGEFF,true,true);
-          return true;
-        case SpellDmgEff:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(DEBUFF_SPELLDMGEFF,true,true);
-          return true;
-        case ManaCost:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(DEBUFF_SPELLMANACOST,true,true);
-          return true;
-        case Snared:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(DEBUFF_MOVESPEED,false,true);
-          return true;
-        case Rooted:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetRooted();
-          return true;
-        case Blind:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(EFFECT_BLINDNESS,false,false);
-          return true;
-        case Charmed:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(EFFECT_CHARM,false,false);
-          return true;
-        case Feared:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(EFFECT_FEAR,false,false);
-          return true;
-        case Silenced:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetDebuffInfo(EFFECT_SILENCE,false,false);
-          return true;
-        case Invulnerable:
-          Dest.Type=pBoolType;
-          Dest.DWord=GetEffectInfo(EFFECT_INVULNERABILITY);
-          return true;
-        case Detrimentals:
-          Dest.Type=pBoolType;
-          Dest.DWord=(dSize)?true:false;
-          return true;
-        case Counters:
-          Dest.Type=pIntType;
-          Dest.Int =GetTotalCounters(COUNTER_POISON)  +
-                    GetTotalCounters(COUNTER_DISEASE) +
-                    GetTotalCounters(COUNTER_CURSE) +
-               GetTotalCounters(COUNTER_CORRUPTION);
-          return true;
-    }
-    Dest.Type=pStringType;
-    Dest.Ptr=&Temp[0];
-    strcpy_s(Temp,"NULL");
-    return true;
-  }
+		if(!_stricmp(Index,"pet") || !_stricmp(Index,"warder")) {
+			if(pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0) {
+				for(int b=0; b<MAXBUFF_WARDER; b++) {
+					if(PSPELL spell = GetSpellByID(pPetInfoWnd->Buff[b]))
+						if(spell->DurationCap>0) {
+							((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
+							aList[aSize++]=spell;
+						}
+				}
+			}
+			return;
+		}
 
-  bool FromData(MQ2VARPTR &VarPtr, MQ2TYPEVAR &Source) {
-    return false;
-  }
+		char BuffID[MAX_STRING];
+		for(int b=0; b<MAXBUFF_WARDER; b++) {
+			GetArg(BuffID,Index,b+1);
+			if(PSPELL spell=GetSpellByID(atol(BuffID))) {
+				if(spell->DurationCap>0) {
+					((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
+					aList[aSize++]=spell;
+				}
+			}
+		}
+	}
 
-  bool FromString(MQ2VARPTR &VarPtr, PCHAR Source) {
-    return false;
-  }
+	virtual bool GetMember(MQVarPtr VarPtr, const char* Member, char* Index, MQTypeVar& Dest) override {
+		if(auto pMember = MQ2DebuffType::FindMember(Member)) {
+			switch((DebuffMembers)pMember->ID) {
+				case Poisoned:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetTotalCounters(COUNTER_POISON);
+					return true;
+				case Diseased:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetTotalCounters(COUNTER_DISEASE);
+					return true;
+				case Cursed:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetTotalCounters(COUNTER_CURSE);
+					return true;
+				case Corrupted:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetTotalCounters(COUNTER_CORRUPTION);
+					return true;
+				case Poisons:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetSpellCount(COUNTER_POISON);
+					return true;
+				case Diseases:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetSpellCount(COUNTER_DISEASE);
+					return true;
+				case Curses:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetSpellCount(COUNTER_CURSE);
+					return true;
+				case Corruptions:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetSpellCount(COUNTER_CORRUPTION);
+					return true;
+				case Count:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetSpellCount(COUNTER_POISON) + GetSpellCount(COUNTER_DISEASE) + GetSpellCount(COUNTER_CURSE) + GetSpellCount(COUNTER_CORRUPTION);
+					return true;
+				case HPDrain:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetDrainInfo(DRAIN_HP,ReturnType(Index));
+					return true;
+				case EnduranceDrain:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetDrainInfo(DRAIN_ENDU,ReturnType(Index));
+					return true;
+				case ManaDrain:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetDrainInfo(DRAIN_MANA,ReturnType(Index));
+					return true;
+				case Slowed:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetSlowedState();
+					return true;
+				case SpellSlowed:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(DEBUFF_SPELLHASTE,true,true);
+					return true;
+				case CastingLevel:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(DEBUFF_CASTLEVEL,true,true);
+					return true;
+				case HealingEff:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(DEBUFF_HEALINGEFF,true,true);
+					return true;
+				case SpellDmgEff:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(DEBUFF_SPELLDMGEFF,true,true);
+					return true;
+				case ManaCost:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(DEBUFF_SPELLMANACOST,true,true);
+					return true;
+				case Snared:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(DEBUFF_MOVESPEED,false,true);
+					return true;
+				case Rooted:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetRooted();
+					return true;
+				case Blind:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(EFFECT_BLINDNESS,false,false);
+					return true;
+				case Charmed:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(EFFECT_CHARM,false,false);
+					return true;
+				case Feared:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(EFFECT_FEAR,false,false);
+					return true;
+				case Silenced:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetDebuffInfo(EFFECT_SILENCE,false,false);
+					return true;
+				case Invulnerable:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=GetEffectInfo(EFFECT_INVULNERABILITY);
+					return true;
+				case Detrimentals:
+					Dest.Type=mq::datatypes::pBoolType;
+					Dest.DWord=dSize > 0;
+					return true;
+				case Counters:
+					Dest.Type=mq::datatypes::pIntType;
+					Dest.Int=GetTotalCounters(COUNTER_POISON) + GetTotalCounters(COUNTER_DISEASE) + GetTotalCounters(COUNTER_CURSE) + GetTotalCounters(COUNTER_CORRUPTION);
+					return true;
+			}
+		}
 
-  bool ToString(MQ2VARPTR VarPtr, PCHAR Destination) {
-    bool HasDebuff=false;
-    for(long buff=0; !HasDebuff && buff<dSize; buff++)
-      if(GetSlotDebuff(dList[buff])) HasDebuff=true;
-    strcpy_s(Destination,MAX_STRING,HasDebuff?"TRUE":"FALSE");
-    return true;
-  }
+		return false;
+	}
 
-  ~MQ2DebuffType() { }
+	bool ToString(MQVarPtr VarPtr, char* Destination) override {
+		bool HasDebuff=false;
+		for(long buff=0; !HasDebuff && buff<dSize; buff++) {
+			if(GetSlotDebuff(dList[buff])) {
+				HasDebuff=true;
+				break;
+			}
+		}
+		strcpy_s(Destination, MAX_STRING, HasDebuff ? "TRUE" : "FALSE");
+		return true;
+	}
+
+	~MQ2DebuffType() { }
 };
 
-BOOL dataDebuff(PCHAR Index, MQ2TYPEVAR &Dest) {
-  Dest.DWord=1;
-  Dest.Type=pDebuffType;
-  pDebuffType->SetBuffs(Index);
-  return true;
+bool dataDebuff(const char* szIndex, MQTypeVar& Dest) {
+	Dest.DWord=1;
+	Dest.Type=pDebuffType;
+	pDebuffType->SetBuffs(szIndex);
+	return true;
 }
 
-PLUGIN_API VOID InitializePlugin(VOID) {
-  pDebuffType = new MQ2DebuffType;
-  AddMQ2Data("Debuff",dataDebuff);
+PLUGIN_API void InitializePlugin() {
+	pDebuffType = new MQ2DebuffType;
+	AddMQ2Data("Debuff", dataDebuff);
 }
 
-PLUGIN_API VOID ShutdownPlugin(VOID) {
-  RemoveMQ2Data("Debuff");
-  delete pDebuffType;
+PLUGIN_API void ShutdownPlugin() {
+	RemoveMQ2Data("Debuff");
+	delete pDebuffType;
 }
