@@ -218,7 +218,7 @@ private:
 			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
 				if(GetSpellAttrib(dList[buff],slot)!=DEBUFF_ATTACKSPEED)
 					continue;
-				int Slow=((GetSpellMax(dList[buff],slot)) ? GetSpellMax(dList[buff],slot): GetSpellBase(dList[buff],slot))-100;
+				int64_t Slow=((GetSpellMax(dList[buff],slot)) ? GetSpellMax(dList[buff],slot): GetSpellBase(dList[buff],slot))-100;
 				if(Slow<0)
 					return true;
 			}
@@ -305,7 +305,7 @@ public:
 		ZeroMemory(&aList,sizeof(aList)); aSize=0;
 		if(!Index[0] || !_stricmp(Index,"self") || !_stricmp(Index,"myself")) {
 			for(int b=0; b<MAXBUFF_MYSELF; b++) {
-				if(PSPELL spell=GetSpellByID(GetPcProfile()->Buff[b].SpellID))
+				if(PSPELL spell=GetSpellByID(GetPcProfile()->GetEffect(b).SpellID))
 				if(spell->DurationCap>0) {
 					((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 					aList[aSize++]=spell;
