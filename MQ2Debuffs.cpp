@@ -317,7 +317,7 @@ public:
 		if(!_stricmp(Index,"pet") || !_stricmp(Index,"warder")) {
 			if(pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0) {
 				for(int b=0; b<MAXBUFF_WARDER; b++) {
-					if(PSPELL spell = GetSpellByID(pPetInfoWnd->Buff[b]))
+					if(PSPELL spell = GetSpellByID(pPetInfoWnd->GetBuff(b)))
 						if(spell->DurationCap>0) {
 							((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 							aList[aSize++]=spell;
