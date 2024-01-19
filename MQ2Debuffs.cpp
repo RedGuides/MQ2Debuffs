@@ -114,9 +114,9 @@ private:
 
 	int GetSpellCount(int CounterType) {
 		int counters=0;
-		for(int buff=0; buff<dSize; buff++) {
-			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-				if(GetSpellAttrib(dList[buff],slot)==CounterType) {
+		for (int buff=0; buff<dSize; buff++) {
+			for (int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if (GetSpellAttrib(dList[buff],slot)==CounterType) {
 					counters++;
 					break;
 				}
@@ -127,9 +127,9 @@ private:
 
 	int GetTotalCounters(int CounterType) {
 		int counters=0;
-		for(int buff=0; buff<dSize; buff++) {
-			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-				if(GetSpellAttrib(dList[buff],slot)==CounterType)
+		for (int buff=0; buff<dSize; buff++) {
+			for (int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if (GetSpellAttrib(dList[buff],slot)==CounterType)
 					counters+=(int)GetSpellBase(dList[buff],slot);
 			}
 		}
@@ -143,12 +143,12 @@ private:
 	}
 
 	bool GetDebuffInfo(int DebuffType, bool HaveCounter, bool BaseCheck) {
-		for(long buff=0; buff<dSize; buff++) {
-			if(HaveCounter && !GetSlotDebuff(dList[buff]))
+		for (long buff=0; buff<dSize; buff++) {
+			if (HaveCounter && !GetSlotDebuff(dList[buff]))
 				continue;
-			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-				if(GetSpellAttrib(dList[buff],slot)==DebuffType)
-					if(!BaseCheck || GetSpellBase(dList[buff],slot)<=0)
+			for (int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if (GetSpellAttrib(dList[buff],slot)==DebuffType)
+					if (!BaseCheck || GetSpellBase(dList[buff],slot)<=0)
 						return true;
 			}
 		}
@@ -156,9 +156,9 @@ private:
 	}
 
 	bool GetEffectInfo(int EffectType) {
-		for(long buff=0; buff<aSize; buff++) {
-			for(int slot=0; slot<GetSpellNumEffects(aList[buff]); slot++) {
-				if(GetSpellAttrib(aList[buff],slot)==EffectType)
+		for (long buff=0; buff<aSize; buff++) {
+			for (int slot=0; slot<GetSpellNumEffects(aList[buff]); slot++) {
+				if (GetSpellAttrib(aList[buff],slot)==EffectType)
 					return true;
 			}
 		}
@@ -166,8 +166,8 @@ private:
 	}
 
 	bool GetRooted() {
-		for(int buff=0; buff<dSize; buff++) {
-			if(GetSpellAttrib(dList[buff],DEBUFF_ROOTSLOT)==DEBUFF_ROOT) {
+		for (int buff=0; buff<dSize; buff++) {
+			if (GetSpellAttrib(dList[buff],DEBUFF_ROOTSLOT)==DEBUFF_ROOT) {
 				return true;
 			}
 		}
@@ -176,10 +176,10 @@ private:
 
 	int GetDrainInfo(int DrainType, int ReturnType) {
 		int amount=0;
-		if(ReturnType) {
+		if (ReturnType) {
 			int CountC=0; int CountD=0; int CountP=0; int CountCo=0;
-			for(int buff=0; buff<dSize; buff++) {
-				if(GetSlotDebuff(dList[buff])) {
+			for (int buff=0; buff<dSize; buff++) {
+				if (GetSlotDebuff(dList[buff])) {
 					int LocalC=0; int LocalD=0; int LocalP=0; int LocalCo=0; int DrainValue=0;
 					for (int slot = 0; slot < GetSpellNumEffects(dList[buff]); slot++) {
 						switch (GetSpellAttrib(dList[buff], slot)) {
@@ -193,7 +193,7 @@ private:
 								}
 						}
 					}
-					if(DrainValue) {
+					if (DrainValue) {
 						amount+=DrainValue;
 						CountC+=LocalC;
 						CountD+=LocalD;
@@ -214,12 +214,12 @@ private:
 	}
 
 	bool GetSlowedState() {
-		for(long buff=0; buff<dSize; buff++) {
-			for(int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
-				if(GetSpellAttrib(dList[buff],slot)!=DEBUFF_ATTACKSPEED)
+		for (long buff=0; buff<dSize; buff++) {
+			for (int slot=0; slot<GetSpellNumEffects(dList[buff]); slot++) {
+				if (GetSpellAttrib(dList[buff],slot)!=DEBUFF_ATTACKSPEED)
 					continue;
 				int64_t Slow=((GetSpellMax(dList[buff],slot)) ? GetSpellMax(dList[buff],slot): GetSpellBase(dList[buff],slot))-100;
-				if(Slow<0)
+				if (Slow<0)
 					return true;
 			}
 		}
@@ -227,12 +227,12 @@ private:
 	}
 
 	int ReturnType(PCHAR Index) {
-		if(!Index[0])                  return RETURN_VALUE;
-		if(!_stricmp(Index,"Disease")) return RETURN_DISEASE;
-		if(!_stricmp(Index,"Poison"))  return RETURN_POISON;
-		if(!_stricmp(Index,"Curse"))   return RETURN_CURSE;
-		if(!_stricmp(Index,"Corruption")) return RETURN_CORRUPTION;
-		if(!_stricmp(Index,"All"))     return RETURN_ALL;
+		if (!Index[0])                  return RETURN_VALUE;
+		if (!_stricmp(Index,"Disease")) return RETURN_DISEASE;
+		if (!_stricmp(Index,"Poison"))  return RETURN_POISON;
+		if (!_stricmp(Index,"Curse"))   return RETURN_CURSE;
+		if (!_stricmp(Index,"Corruption")) return RETURN_CORRUPTION;
+		if (!_stricmp(Index,"All"))     return RETURN_ALL;
 		return 0;
 	}
 
@@ -303,10 +303,10 @@ public:
 		ZeroMemory(&dList,sizeof(dList)); dSize=0;
 		ZeroMemory(&bList,sizeof(bList)); bSize=0;
 		ZeroMemory(&aList,sizeof(aList)); aSize=0;
-		if(!Index[0] || !_stricmp(Index,"self") || !_stricmp(Index,"myself")) {
-			for(int b=0; b<MAXBUFF_MYSELF; b++) {
-				if(PSPELL spell=GetSpellByID(GetPcProfile()->GetEffect(b).SpellID))
-				if(spell->DurationCap>0) {
+		if (!Index[0] || !_stricmp(Index,"self") || !_stricmp(Index,"myself")) {
+			for (int b=0; b<MAXBUFF_MYSELF; b++) {
+				if (PSPELL spell=GetSpellByID(GetPcProfile()->GetEffect(b).SpellID))
+				if (spell->DurationCap>0) {
 					((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 					aList[aSize++]=spell;
 				}
@@ -314,11 +314,11 @@ public:
 			return;
 		}
 
-		if(!_stricmp(Index,"pet") || !_stricmp(Index,"warder")) {
-			if(pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0) {
-				for(int b=0; b<MAXBUFF_WARDER; b++) {
-					if(PSPELL spell = GetSpellByID(pPetInfoWnd->Buff[b]))
-						if(spell->DurationCap>0) {
+		if (!_stricmp(Index,"pet") || !_stricmp(Index,"warder")) {
+			if (pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0) {
+				for (int b=0; b<MAXBUFF_WARDER; b++) {
+					if (PSPELL spell = GetSpellByID(pPetInfoWnd->Buff[b]))
+						if (spell->DurationCap>0) {
 							((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 							aList[aSize++]=spell;
 						}
@@ -328,10 +328,10 @@ public:
 		}
 
 		char BuffID[MAX_STRING];
-		for(int b=0; b<MAXBUFF_WARDER; b++) {
+		for (int b=0; b<MAXBUFF_WARDER; b++) {
 			GetArg(BuffID,Index,b+1);
-			if(PSPELL spell=GetSpellByID(atol(BuffID))) {
-				if(spell->DurationCap>0) {
+			if (PSPELL spell=GetSpellByID(atol(BuffID))) {
+				if (spell->DurationCap>0) {
 					((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 					aList[aSize++]=spell;
 				}
@@ -340,7 +340,7 @@ public:
 	}
 
 	virtual bool GetMember(MQVarPtr VarPtr, const char* Member, char* Index, MQTypeVar& Dest) override {
-		if(auto pMember = MQ2DebuffType::FindMember(Member)) {
+		if (auto pMember = MQ2DebuffType::FindMember(Member)) {
 			switch((DebuffMembers)pMember->ID) {
 				case Poisoned:
 					Dest.Type=mq::datatypes::pIntType;
@@ -458,8 +458,8 @@ public:
 
 	bool ToString(MQVarPtr VarPtr, char* Destination) override {
 		bool HasDebuff=false;
-		for(long buff=0; !HasDebuff && buff<dSize; buff++) {
-			if(GetSlotDebuff(dList[buff])) {
+		for (long buff=0; !HasDebuff && buff<dSize; buff++) {
+			if (GetSlotDebuff(dList[buff])) {
 				HasDebuff=true;
 				break;
 			}
