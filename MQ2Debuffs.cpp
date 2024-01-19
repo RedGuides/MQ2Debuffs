@@ -55,7 +55,7 @@
 PreSetup("MQ2Debuff");
 PLUGIN_VERSION(2.0);
 
-// FIXME:  I suspect most of these are maintained in core.
+// FIXME:  I suspect most of these are maintained in core.  They are also now outdated and incorrect
 #define MAXBUFF_WARDER         30
 #define MAXBUFF_MYSELF         25
 
@@ -314,11 +314,12 @@ public:
 			return;
 		}
 
-		if (!_stricmp(Index,"pet") || !_stricmp(Index,"warder")) {
-			if (pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0) {
-				for (int b=0; b<MAXBUFF_WARDER; b++) {
-					if (PSPELL spell = GetSpellByID(pPetInfoWnd->Buff[b]))
-						if (spell->DurationCap>0) {
+		if(!_stricmp(Index,"pet") || !_stricmp(Index,"warder")) {
+			if(pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0) {
+				// FIXME: This would likely be better as a range based for loop
+				for(int b=0; b<MAXBUFF_WARDER; b++) {
+					if(const PSPELL spell = GetSpellByID(pPetInfoWnd->GetBuff(b)))
+						if(spell->DurationCap>0) {
 							((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 							aList[aSize++]=spell;
 						}
