@@ -96,12 +96,12 @@ PLUGIN_VERSION(2.0);
 class MQ2DebuffType *pDebuffType=0;
 class MQ2DebuffType : public MQ2Type {
 private:
-	PSPELL dList[30]; long dSize;
-	PSPELL bList[30]; long bSize;
-	PSPELL aList[30]; long aSize;
+	EQ_Spell* dList[30]; long dSize;
+	EQ_Spell* bList[30]; long bSize;
+	EQ_Spell* aList[30]; long aSize;
 	char   Temp[MAX_STRING];
 
-	int GetSlotDebuff(PSPELL spell)
+	int GetSlotDebuff(EQ_Spell* spell)
 	{
 		for (int slot = 0; slot < GetSpellNumEffects(spell); slot++) {
 			const int attrib = GetSpellAttrib(spell, slot);
@@ -136,7 +136,7 @@ private:
 		return counters;
 	}
 
-	int SlotCalculate(PSPELL spell, int slot) {
+	int SlotCalculate(EQ_Spell* spell, int slot) {
 		char Buffer[MAX_STRING]= { 0 };
 		SlotValueCalculate(Buffer,spell,slot,1);
 		return atoi(Buffer);
@@ -305,7 +305,7 @@ public:
 		ZeroMemory(&aList,sizeof(aList)); aSize=0;
 		if (!Index[0] || !_stricmp(Index,"self") || !_stricmp(Index,"myself")) {
 			for (int b=0; b<MAXBUFF_MYSELF; b++) {
-				if (PSPELL spell=GetSpellByID(GetPcProfile()->GetEffect(b).SpellID))
+				if (EQ_Spell* spell = GetSpellByID(GetPcProfile()->GetEffect(b).SpellID))
 				if (spell->DurationCap>0) {
 					((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 					aList[aSize++]=spell;
@@ -318,7 +318,7 @@ public:
 			if(pPetInfoWnd && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo()->pSpawn->PetID>0) {
 				// FIXME: This would likely be better as a range based for loop
 				for(int b=0; b<MAXBUFF_WARDER; b++) {
-					if(const PSPELL spell = GetSpellByID(pPetInfoWnd->GetBuff(b)))
+					if(const EQ_Spell* spell = GetSpellByID(pPetInfoWnd->GetBuff(b)))
 						if(spell->DurationCap>0) {
 							((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 							aList[aSize++]=spell;
@@ -331,7 +331,7 @@ public:
 		char BuffID[MAX_STRING];
 		for (int b=0; b<MAXBUFF_WARDER; b++) {
 			GetArg(BuffID,Index,b+1);
-			if (PSPELL spell=GetSpellByID(atol(BuffID))) {
+			if (EQ_Spell* spell = GetSpellByID(atol(BuffID))) {
 				if (spell->DurationCap>0) {
 					((spell->SpellType)?bList[bSize++]:dList[dSize++])=spell;
 					aList[aSize++]=spell;
