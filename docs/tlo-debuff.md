@@ -10,21 +10,20 @@ Holds the Debuff data type and several forms for pets and specific debuffs
 
 ## Forms
 <!--tlo-forms-start-->
-### {{ renderMember(type='bool', name='Debuff') }}
+/// member | bool Debuff
+True if you have debuffs on that have counters on them, false if not
+///
 
-:   True if you have debuffs on that have counters on them, false if not
+/// member | Debuff Debuff[self]
+return info for debuff from self. e.g. `${Debuff[self].Slowed}`
+///
 
-### {{ renderMember(type='Debuff', name='Debuff', params='self') }}
+/// member | Debuff Debuff[pet|warder]
+///
 
-:   return info for debuff from self. e.g. `${Debuff[self].Slowed}`
-
-### {{ renderMember(type='Debuff', name='Debuff[pet|warder]') }}
-
-:   
-
-### {{ renderMember(type='Debuff', name='Debuff', params='spell id ...') }}
-
-:   return info for a specific debuff, or a list of debuffs. e.g. `${Debuff[5682].Slowed}` or for a list, `${Debuff[5682 2899 887].Slowed}`
+/// member | Debuff Debuff[spell id ...]
+return info for a specific debuff, or a list of debuffs. e.g. `${Debuff[5682].Slowed}` or for a list, `${Debuff[5682 2899 887].Slowed}`
+///
 
 <!--tlo-forms-end-->
 

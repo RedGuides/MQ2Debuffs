@@ -10,116 +10,116 @@ Reports harmful effects, number of curse/disease/poison counters and various oth
 
 ## Members
 <!--dt-members-start-->
-### {{ renderMember(type='int', name='Poisoned') }}
+/// member | int Poisoned
+*#* of poison counters on you
+///
 
-:   *#* of poison counters on you
+/// member | int Diseased
+*#* of disease counters on you
+///
 
-### {{ renderMember(type='int', name='Diseased') }}
+/// member | int Cursed
+*#* of curse counters on you
+///
 
-:   *#* of disease counters on you
+/// member | int Corrupted
+*#* of corruption counters on you
+///
 
-### {{ renderMember(type='int', name='Cursed') }}
+/// member | int Poisons
+*#* of poison spells affecting you
+///
 
-:   *#* of curse counters on you
+/// member | int Diseases
+*#* of disease spells affecting you
+///
 
-### {{ renderMember(type='int', name='Corrupted') }}
+/// member | int Curses
+*#* of curse spells affecting you
+///
 
-:   *#* of corruption counters on you
+/// member | int Corruptions
+*#* of corruption spells affecting you
+///
 
-### {{ renderMember(type='int', name='Poisons') }}
+/// member | int Count
+*#* of debuffs that need cured, does not include snare
+///
 
-:   *#* of poison spells affecting you
-
-### {{ renderMember(type='int', name='Diseases') }}
-
-:   *#* of disease spells affecting you
-
-### {{ renderMember(type='int', name='Curses') }}
-
-:   *#* of curse spells affecting you
-
-### {{ renderMember(type='int', name='Corruptions') }}
-
-:   *#* of corruption spells affecting you
-
-### {{ renderMember(type='int', name='Count') }}
-
-:   *#* of debuffs that need cured, does not include snare
-
-### {{ renderMember(type='int', name='HPDrain', params='ѕtring') }}
-
-:   * No index= Amount of HP you are losing per tick from debuffs. This value is POSITIVE
+/// member | int HPDrain[string]
+* No index= Amount of HP you are losing per tick from debuffs. This value is POSITIVE
 * string= Disease, Poison, Curse, All: Number of specific counters effecting HP
+///
 
-### {{ renderMember(type='int', name='ManaDrain', params='ѕtring') }}
-
-:   * No index= Amount of Mana you are losing per tick from debuffs. This value is POSITIVE
+/// member | int ManaDrain[string]
+* No index= Amount of Mana you are losing per tick from debuffs. This value is POSITIVE
 * string= Disease, Poison, Curse, All: Number of specific counters effecting Mana
+///
 
-### {{ renderMember(type='int', name='EnduranceDrain', params='ѕtring') }}
-
-:   * No index= Amount of Endurance you are losing per tick from debuffs. This value is POSITIVE
+/// member | int EnduranceDrain[string]
+* No index= Amount of Endurance you are losing per tick from debuffs. This value is POSITIVE
 * string= Disease, Poison, Curse, All: Number of specific counters effecting Endurance
+///
 
-### {{ renderMember(type='bool', name='Slowed') }}
+/// member | bool Slowed
+True if you are Slowed (melee attacks), False if not
+///
 
-:   True if you are Slowed (melee attacks), False if not
+/// member | bool SpellSlowed
+True if you are SpellSlowed (spell haste reduction), False if not
+///
 
-### {{ renderMember(type='bool', name='SpellSlowed') }}
+/// member | bool Snared
+True if your are Snared, False if not
+///
 
-:   True if you are SpellSlowed (spell haste reduction), False if not
+/// member | bool ManaCost
+True if your Spell Mana Cost has been raised, False if not
+///
 
-### {{ renderMember(type='bool', name='Snared') }}
+/// member | bool CastingLevel
+True if your Effective Casting Level has been reduced, False if not
+///
 
-:   True if your are Snared, False if not
+/// member | bool HealingEff
+True if your Healing Effectiveness has been reduced, False if not
+///
 
-### {{ renderMember(type='bool', name='ManaCost') }}
+/// member | bool SpellDmgEff
+True if your Spell Damage Effectiveness has been reduced, False if not
+///
 
-:   True if your Spell Mana Cost has been raised, False if not
+/// member | bool Blind
+True if you are blind
+///
 
-### {{ renderMember(type='bool', name='CastingLevel') }}
+/// member | bool Charmed
+True if you are charmed
+///
 
-:   True if your Effective Casting Level has been reduced, False if not
+/// member | bool Feared
+True if you are feared
+///
 
-### {{ renderMember(type='bool', name='HealingEff') }}
+/// member | bool Silenced
+True if you are silenced
+///
 
-:   True if your Healing Effectiveness has been reduced, False if not
+/// member | bool Invulnerable
+True if you are invulnerable
+///
 
-### {{ renderMember(type='bool', name='SpellDmgEff') }}
+/// member | bool Detrimentals
+True if you have any detrimental effects on you
+///
 
-:   True if your Spell Damage Effectiveness has been reduced, False if not
+/// member | int Counters
+*#* of poison/disease/curse/corruption counters on yourself
+///
 
-### {{ renderMember(type='bool', name='Blind') }}
-
-:   True if you are blind
-
-### {{ renderMember(type='bool', name='Charmed') }}
-
-:   True if you are charmed
-
-### {{ renderMember(type='bool', name='Feared') }}
-
-:   True if you are feared
-
-### {{ renderMember(type='bool', name='Silenced') }}
-
-:   True if you are silenced
-
-### {{ renderMember(type='bool', name='Invulnerable') }}
-
-:   True if you are invulnerable
-
-### {{ renderMember(type='bool', name='Detrimentals') }}
-
-:   True if you have any detrimental effects on you
-
-### {{ renderMember(type='int', name='Counters') }}
-
-:   *#* of poison/disease/curse/corruption counters on yourself
-
-### {{ renderMember(type='bool', name='Rooted') }}
-
-:   True if you are rooted
+/// member | bool Rooted
+True if you are rooted
+///
 
 <!--dt-members-end-->
 
